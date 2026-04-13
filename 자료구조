@@ -1,0 +1,93 @@
+class Drink_Node{		//링크드 리스트 구현
+	String name;
+	int price;
+	int count;
+	Drink_Node next;	//자바는 객체지향이라 *를 안 붙여도 되지만 c는 절차지향이라 *가 붙어야함.
+	
+	public Drink_Node(String name, int price, int count) {
+		this.name=name;
+		this.price=price;
+		this.count=count;
+		this.next=null;
+	}
+}
+
+class Linked_list {					//음료 링크드 리스트 (삽입과 선형탐색)
+	private Drink_Node head;
+	
+	public Linked_list() {
+		head=null;
+	}
+	
+	public void insert_node(String name,int price, int count) {//맨 마지막에 음료 정보를 갖는 노드 삽입
+		Drink_Node newNode = new Drink_Node(name,price,count);
+		if(head==null) {
+			this.head=newNode;
+		}
+		else {
+			Drink_Node temp=head;
+		while(temp.next!=null) {
+			temp=temp.next;		//다음 노드로로 이동
+		}
+		temp.next=newNode;		//마지막 노드에 새 정보를 가진 노드 연결
+		}
+	}
+	
+	//음료 이름으로 해당 음료 노드 찾기
+	public Drink_Node find_drink(String name) {
+		/*만약 찾을 경우 해당 값의 결과 반환을 위해 반환형으로 노드를 지정
+		  1번재 노드에 있을 수도 있기에 일단 확인 후 없으면 다음 노드로 이동*/
+		Drink_Node find_temp=head;
+
+		while(find_temp!=null) {
+			if(name.equals(find_temp.name)) {//이름을 찾았을 경우
+				return find_temp;
+			}
+			find_temp=find_temp.next;		//다음 노드로 이동
+		}
+		return null;						//없으면 널 반환과 !못 찾았다는 메시지 출력!
+	}
+}									//음료 링크드 리스트 부분 끝 (삽입과 선형탐색)
+
+class STACK{		//동전반환
+	int top;
+	int size;
+	int []stack;
+	
+	STACK(int size){
+		this.size=size;
+		stack=new int[size];
+		top=-1;
+	}
+	
+	public void push(int item) {
+		stack[++top] = item;
+	}
+	
+    public void pop() {
+    	int pop = stack[top];
+    	stack[top--] = 0;
+    	}
+    
+    public void peek() {
+    	
+    }
+}
+
+class Queue{		//음료재고 보충
+	int front;
+	int rear;
+	int QueueSIZE;
+	int []Queuesize;
+	
+	Queue(int front, int rear){
+		this.front=front;
+		this.rear=rear;
+		Queuesize=new int[QueueSIZE];
+	}
+	
+	public Drink_Node refill() {
+		//Drink_Node new_node=head;
+		return null;
+	}
+}
