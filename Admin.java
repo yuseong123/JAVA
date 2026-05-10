@@ -104,9 +104,9 @@ class checking {
 	private void collect_money(int[] unit,int[][] money_array) {
 		for(int i=0;i<5;i++) {
 			if(money_array[i][2]>10) {
-				money_array[i][1]++;
+				money_array[i][0]++;
+				money_array[i][1]--;
 				money_array[i][2]--;
-				money_array[i][3]--;
 				System.out.println(unit[i]+"원이 수금되었습니다.");
 			}
 		}
@@ -135,7 +135,63 @@ class change{
 	}
 }
 //파일로 기록되어 있어야 함
+/*
+private void day_save_sale(Drink_Node drink) {//시간정보 받기
+	int day_total_money=0;	//일별 총 매출
 
+	LocalDateTime now=LocalDateTime.now();	//현재 날짜와 시간 가져옴
+	String folderName=now.format(DateTimeFormatter.ofPattern("yyyy_MM"));	//해당 월에 대한 폴더 생성
+	File directory =new File(folderName);
+	if(!directory.exists()) {
+		directory.mkdir();		//다음 달로 넘어갈 경우, 새 디렉토리 생성
+	}							//해당 연월을 가진 '폴더'생성
+	
+	String fileName=now.format(DateTimeFormatter.ofPattern("dd"))+".txt";	//사람용 당일 판매데이터를 가진 파일 생성
+	File file=new File(folderName,fileName);
+	
+	//사람용 당일 판매 데이터 파일
+	try(BufferedWriter writer=new BufferedWriter(new FileWriter(file,true))){
+		writer.write("팔린 물건: "+ drink.name +" | "+"가격: "+drink.price);
+		writer.newLine();
+		}
+	catch(IOException e) {
+		e.printStackTrace();	//에러 메시지 출력
+	}
+	
+	//일 매출 파일(서버 기록용)
+	String fileName1=now.format(DateTimeFormatter.ofPattern("dd"))+".DB"+".txt";	//DB용 당일 판매데이터를 가진 파일 생성
+	File file1=new File(folderName,fileName1);
+	try(BufferedWriter writer=new BufferedWriter(new FileWriter(file1,true))){
+		day_total_money+=drink.price;
+		writer.write(drink.price+","+day_total_money);		//일 매출까지 ,로 구분 후 저장. 예:1000,10000
+		writer.newLine();
+		
+	}
+	catch(IOException e) {
+		e.printStackTrace();	//에러 메시지 출력
+	}
+}
+
+public void month_save_sale(Drink_Node drink) {
+	LocalDateTime now=LocalDateTime.now();	//현재 날짜와 시간 가져옴
+	int month_total_money=0;	//월별 총 매출
+	String line;				//일 매출 파일에서 한 줄을 읽고 임시 저장할 변수
+	String []result;			//일 매출만 저장할 변수
+	//String month_total=folderName+"record.txt";								//월 매출용 파일 생성
+	//File month_total_file=new File(folderName,month_total);
+	try(BufferedReader br=new BufferedReader(new FileReader("file.txt"))){
+		while((line=br.readLine())!=null) {
+			result=line.split(",");
+			month_total_money+=Integer.parseInt(result[1]);	//파일의 일매출들을 전부 읽고 해당 것들을 전부 변수에 저장.
+		}
+		BufferedWriter bw=new BufferedWriter(new FileWriter("MM_sale.txt",true));
+		bw.write("월 매출:"+month_total_money);
+		bw.newLine();
+	}
+	catch(IOException e) {
+		e.printStackTrace();
+	}
+}*/
 
 //관리자 페이지가 작동하는 동안은 다른 페이지는 작동 불가
 /*
