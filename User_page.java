@@ -28,8 +28,18 @@ import java.time.format.DateTimeFormatter;
 */
 
 public class User_page {
-	public static int[][]money=new int[5][5];
-	//1열 처음부터 사람이 보유한 화폐 수, 2열 처음부터 자판기가 보유한 화폐 수, 3열은 자판기에 투입된 화폐의 수 ,4열은 미정
+	public static int[][]money=new int[5][3];
+	static {
+		for(int i=0;i<5;i++) {
+			money[i][0]=10;
+			money[i][1]=10;
+			money[i][2]=0;
+		}
+	}
+	
+	//1열 처음부터 사람이 보유한 화폐 수, 2열 처음부터 자판기가 보유한 화폐 수, 3열은 자판기에 투입 기록 ,4열은 미정
+	//행은 전부 각 금액별로 분류한 것
+	//0열로 사람이 보유한 화폐 수 교체, 1열은 자판기가 보유한 화폐수로 교체 ,3열은 자판기에 돈 투입 기록으로 교체 4열은 삭제
 	public static int[] money_unit= {10,50,100,500,1000};
 
 }
@@ -49,7 +59,7 @@ class Drink_Node{		//링크드 리스트 구현
 }
 
 class Linked_list {					//음료 링크드 리스트 (삽입과 선형탐색)
-	private Drink_Node head;
+	public Drink_Node head;
 	
 	public Linked_list() {
 		head=null;
@@ -85,6 +95,55 @@ class Linked_list {					//음료 링크드 리스트 (삽입과 선형탐색)
 	}
 }									//음료 링크드 리스트 부분 끝 (삽입과 선형탐색)
 
+
+class queue_node {
+	String drink_name;
+	queue_node next;
+	
+	public queue_node(String drink_name) {
+		this.drink_name =drink_name;
+		this.next=null;
+	}
+}
+
+class drink_Queue{		//음료재고 보충 , 배열로 구현 시 음료 구매 개수를 한정적으로 저장할 수 있어서 연결리스트로 재구현
+	queue_node front;
+	queue_node rear;
+	
+	drink_Queue(){
+		front=null;
+		rear=null;
+	}
+	
+	public void input_infor(String name) {
+		//매개변수로 정수만 받을 경우
+		//해당 변수의 첫 자리는 판매된 음료 노드의 번호, 나머지 자리는 판매된 음료 개수
+		//0801 이라면 8번째 노드의 음료가 1개 판매된 경우
+		//원래는 정수 변수를 매개변수로 받아서 해당 음료 노드 번호랑 판매된 개수를 받아서 저장하려고 함
+		queue_node new_node=new queue_node(name);
+		if(rear==null) {	//음료 구매를 처음 한 경우
+			front=new_node;
+			rear=new_node;
+		}
+		else {
+			rear.next=new_node;	//다음 노드로 이동
+			rear=new_node;		//정보 삽입
+		}
+		
+	}
+	
+	public String refill() {
+		String name;
+		if(front==null) {//구매된 것이 없는 경우
+			return null;
+		}
+		//구매한 게 있어서 리필할 경우
+		name= front.drink_name;
+		front=front.next;
+		return name;
+	}
+}
+
 class vending{
 	public int inserted_money=0;
 	drink_Queue queuetype = new drink_Queue();	//queue에 정보를 넘기기 위한 인스턴스(객체) 생성
@@ -98,67 +157,11 @@ class vending{
 			inserted_money-=drink.price;//물건 가격만큼 투입된 돈 삭제
 			drink.count--;
 			queuetype.input_infor(drink.name);
+			System.out.println(drink.name+"물건 구매 완료");
 			//물건이 구매되었다는 메시지 출력
 			//지폐에 투입된 화폐도 제거
 			
 		}	
-	}
-	
-	private void day_save_sale(Drink_Node drink) {//시간정보 받기
-		int day_total_money=0;	//일별 총 매출
-
-		LocalDateTime now=LocalDateTime.now();	//현재 날짜와 시간 가져옴
-		String folderName=now.format(DateTimeFormatter.ofPattern("yyyy_MM"));	//해당 월에 대한 폴더 생성
-		File directory =new File(folderName);
-		if(!directory.exists()) {
-			directory.mkdir();		//다음 달로 넘어갈 경우, 새 디렉토리 생성
-		}							//해당 연월을 가진 '폴더'생성
-		
-		String fileName=now.format(DateTimeFormatter.ofPattern("dd"))+".txt";	//사람용 당일 판매데이터를 가진 파일 생성
-		File file=new File(folderName,fileName);
-		
-		//사람용 당일 판매 데이터 파일
-		try(BufferedWriter writer=new BufferedWriter(new FileWriter(file,true))){
-			writer.write("팔린 물건: "+ drink.name +" | "+"가격: "+drink.price);
-			writer.newLine();
-			}
-		catch(IOException e) {
-			e.printStackTrace();	//에러 메시지 출력
-		}
-		
-		//일 매출 파일(서버 기록용)
-		String fileName1=now.format(DateTimeFormatter.ofPattern("dd"))+".DB"+".txt";	//DB용 당일 판매데이터를 가진 파일 생성
-		File file1=new File(folderName,fileName1);
-		try(BufferedWriter writer=new BufferedWriter(new FileWriter(file1,true))){
-			day_total_money+=drink.price;
-			writer.write(drink.price+","+day_total_money);		//일 매출까지 ,로 구분 후 저장. 예:1000,10000
-			writer.newLine();
-			
-		}
-		catch(IOException e) {
-			e.printStackTrace();	//에러 메시지 출력
-		}
-	}
-	
-	public void month_save_sale(Drink_Node drink) {
-		LocalDateTime now=LocalDateTime.now();	//현재 날짜와 시간 가져옴
-		int month_total_money=0;	//월별 총 매출
-		String line;				//일 매출 파일에서 한 줄을 읽고 임시 저장할 변수
-		String []result;			//일 매출만 저장할 변수
-		/*String month_total=folderName+"record.txt";								//월 매출용 파일 생성
-		File month_total_file=new File(folderName,month_total);*/
-		try(BufferedReader br=new BufferedReader(new FileReader("file.txt"))){
-			while((line=br.readLine())!=null) {
-				result=line.split(",");
-				month_total_money+=Integer.parseInt(result[1]);	//파일의 일매출들을 전부 읽고 해당 것들을 전부 변수에 저장.
-			}
-			BufferedWriter bw=new BufferedWriter(new FileWriter("MM_sale.txt",true));
-			bw.write("월 매출:"+month_total_money);
-			bw.newLine();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public void insert_money(int select) {
@@ -166,28 +169,29 @@ class vending{
 		int money=0;	//당장 넣으려는 돈
 		money=User_page.money_unit[select];
 		//소지한 사람의 화폐 수가 0일 경우 투입 불가, 화폐포함 5천원 이상이면 투입 불가, 동전만 7천원 이상이면 투입불가
-		if(User_page.money[select][1]<=0) {//사용자의 보유금액 부족시
+		if(User_page.money[select][0]<=0) {//사용자의 보유금액 부족시
 			return ;
 		}
 		
-		else if(inserted_money>=5000 && User_page.money[4][3]>=1) {//지폐 1장 이상과 투입된 금액 5천원 이상시 투입 불가
+		else if(inserted_money+1000>5000 && select==4) {//지폐 1장 이상이 이미 투입된 경우, 투입할 금액 5천원 이상시 투입 불가
 			return ;
 		}
 		
-		else if(inserted_money>=7000) {//7000원 이상 투입시 추가 투입 불가
+		else if(inserted_money+money>7000) {//7000원 이상 투입시 추가 투입 불가
 			return ;
 		}
 			
 		else {//정상 투입 상황
 			inserted_money+=money;
-			User_page.money[select][1]--;//사람 보유 화폐수 감소
-			User_page.money[select][2]++;//자판기 보유 화폐수 증가
+			User_page.money[select][0]--;//사람 보유 화폐수 감소
+			User_page.money[select][1]++;//자판기 보유 화폐수 증가
+			User_page.money[select][2]++;//투입기록 추가
 		}
 	}	
 }
 
 class pw_tree {							//비밀번호 (트리 구조 사용)
-		static String password="qwer1234!";
+		String password="qwer1234!";
 		pw_tree left;
 		pw_tree right;
 		
@@ -197,15 +201,12 @@ class pw_tree {							//비밀번호 (트리 구조 사용)
 			this.right=null;//실패할 경우 이동
 		}
 		private boolean check_password(String pw) {
-			if (pw.length() < 8) {//1. 8자리 미만일 경우 멈춤
+			if (pw.length() < 8) {//8자리 미만일 경우 멈춤
 				return false;
 			}
-        	boolean hasnum = false;
-        	boolean hasSpecialChar = false;
         	String specialChars = "!@#$%^&*()-=_+?.,;";//특수기호 판단
         	
-        	if(pw.matches(".*[0-9].*")&&pw.matches("[!@#$%^&*].*()-=_+?.,;.")) {
-        			System.out.println("숫자와 특수문자가 포함되어 있습니다.");
+        	if(pw.matches(".*[0-9].*")&&pw.matches(".*[!@#$%^&*()\\-=_+?.,;].*")) {
         			return true;
                 }
         		else {
@@ -215,13 +216,19 @@ class pw_tree {							//비밀번호 (트리 구조 사용)
 		}
 		
 		private void Enter_password(String pw) {
-			if(check_password(pw)==true) {//관리자 페이지 열기
+			if(this.password.equals(pw)) {//관리자 페이지 열기
 				
 			}
 		}
+		
 		public void Change_password(String pw) {
-			Enter_password(pw);
-			password=pw;
+			if(check_password(pw)) {
+				password=pw;
+				System.out.println("비밀번호 교체 성공.");
+			}
+			else {
+				System.out.println("비밀번호 교체 실패");
+			}
 		}
 }
 
@@ -245,18 +252,15 @@ class STACK{		//투입된 돈 반환
     public int pop() {
     	int j=0,total=1000*stack[4]+500*stack[3]+100*stack[2]+50*stack[1]+10*stack[0];
     	for(int i=4;i>=0;i--) {
-    		if(User_page.money[i][3]<0) {//500원 2개를 넣어서 1000원 나오기 방지
-    			break;
-    		}
     		j=stack[i];
-    		User_page.money[i][1]+=j;//사람에게 복구
-			User_page.money[i][2]-=j;//자판기 소유한 화폐 수 차감
-			User_page.money[i][3]-=j;//투입 기록 차감
+    		System.out.println(User_page.money_unit[i]+"원이"+j+"장 반환되었습니다.");
+    		User_page.money[i][0]+=j;//사람에게 복구
+			User_page.money[i][1]-=j;//자판기 소유한 화폐 수 차감
+			User_page.money[i][2]-=j;//투입 기록 차감
+			stack[i]=0;
     	}
     	System.out.println("금액"+total+"원이 반환되었습니다.");
-    	for(int i=4;i>=0;i--) {
-    		System.out.println(User_page.money_unit[i]+"원이"+stack[i]+"장 반환되었습니다.");
-    	}
+    	
     	return j;
     }
 }
